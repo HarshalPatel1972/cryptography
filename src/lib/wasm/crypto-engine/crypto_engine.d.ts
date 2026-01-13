@@ -1,32 +1,26 @@
 /* tslint:disable */
 /* eslint-disable */
 
-/**
- * A simple greeting function to verify Wasm works
- */
+export function get_aes_rounds(key_hex: string, plaintext_hex: string): any;
+
+export function get_sha256(input: string): string;
+
 export function greet(name: string): string;
 
-/**
- * XOR decryption (same as encryption for XOR)
- */
-export function xor_decrypt(data: Uint8Array, key: number): Uint8Array;
-
-/**
- * XOR encryption - a simple cipher for demonstration
- */
-export function xor_encrypt(data: Uint8Array, key: number): Uint8Array;
+export function xor_encrypt(data: string, key: string): string;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
+  readonly get_aes_rounds: (a: number, b: number, c: number, d: number) => any;
+  readonly get_sha256: (a: number, b: number) => [number, number];
   readonly greet: (a: number, b: number) => [number, number];
-  readonly xor_decrypt: (a: number, b: number, c: number) => [number, number];
-  readonly xor_encrypt: (a: number, b: number, c: number) => [number, number];
-  readonly __wbindgen_externrefs: WebAssembly.Table;
+  readonly xor_encrypt: (a: number, b: number, c: number, d: number) => [number, number];
   readonly __wbindgen_malloc: (a: number, b: number) => number;
-  readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
+  readonly __wbindgen_externrefs: WebAssembly.Table;
+  readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __wbindgen_start: () => void;
 }
 
