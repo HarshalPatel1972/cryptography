@@ -66,7 +66,7 @@ export function LessonLayout({
       </div>
 
       {/* Terminal Overlay (Bottom Right) */}
-      <div className="absolute bottom-6 right-6 z-10 w-96 max-h-64 flex flex-col pointer-events-auto">
+      <div className="absolute bottom-20 right-6 z-10 w-96 max-h-64 flex flex-col pointer-events-auto">
         <div className="bg-void/90 border border-neon-purple/30 rounded-t-lg p-2 flex items-center gap-2 text-xs uppercase tracking-wider text-neon-purple">
           <Monitor size={14} />
           <span>System Log</span>
@@ -86,7 +86,7 @@ export function LessonLayout({
       </div>
 
       {/* Controls (Bottom Left) */}
-      <div className="absolute bottom-6 left-6 z-10 flex gap-4 pointer-events-auto">
+      <div className="absolute bottom-20 left-6 z-10 flex gap-4 pointer-events-auto">
         <button
           onClick={resetLesson}
           className="flex items-center gap-2 px-6 py-3 border border-neon-cyan/30 bg-black/60 hover:bg-neon-cyan/10 hover:border-neon-cyan text-neon-cyan rounded transition-all uppercase tracking-wider text-sm group"
