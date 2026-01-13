@@ -1,11 +1,13 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { XORScene } from "@/features/primitives/XORScene";
 import { LessonLayout } from "@/components/layout/LessonLayout";
 import { OrbitControls, Preload } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
+import { useGuidanceStore } from "@/stores/useGuidanceStore";
+
 export default function XORLessonPage() {
   const { setActiveLesson, setStep } = useGuidanceStore();
   
