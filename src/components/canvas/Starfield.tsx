@@ -7,7 +7,7 @@ import * as random from "maath/random/dist/maath-random.esm";
 
 // Starfield component: Generates a rotating sphere of particles
 export function Starfield(props: any) {
-  const ref = useRef<any>();
+  const ref = useRef<any>(null);
   // Generate 5000 points inside a sphere of radius 1.2
   const [sphere] = useState(() =>
     random.inSphere(new Float32Array(5000 * 3), { radius: 1.2 })
