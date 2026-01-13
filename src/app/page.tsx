@@ -11,6 +11,7 @@ const Scene = dynamic(() => import('@/components/canvas/Scene'), {
   loading: () => <Loader />
 });
 import { useScramble } from "@/hooks/useScramble";
+import { SyllabusOverlay } from "@/components/dom/SyllabusOverlay";
 
 export default function Home() {
   const [wasmReady, setWasmReady] = useState(false);
@@ -59,6 +60,11 @@ export default function Home() {
              </span>
           </div>
         </div>
+      </div>
+
+      {/* Syllabus Overlay Button & Panel (z-50) */}
+      <div className="absolute inset-0 z-50 pointer-events-auto">
+         <SyllabusOverlay />
       </div>
     </main>
   );
