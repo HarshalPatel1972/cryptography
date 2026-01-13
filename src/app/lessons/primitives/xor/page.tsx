@@ -6,8 +6,15 @@ import { XORScene } from "@/features/primitives/XORScene";
 import { LessonLayout } from "@/components/layout/LessonLayout";
 import { OrbitControls, Preload } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
-
 export default function XORLessonPage() {
+  const { setActiveLesson, setStep } = useGuidanceStore();
+  
+  // Initialize Guidance
+  useEffect(() => {
+    setActiveLesson('xor');
+    setStep(0); // Start at step 0
+  }, []);
+
   return (
     <LessonLayout
       title="The Neon Rain (XOR)"

@@ -6,6 +6,8 @@ import { Monitor, RefreshCcw, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { Terminal } from "@/components/dom/Terminal";
+import { CommsOverlay } from "@/components/dom/CommsOverlay";
+import { useIdleDetector } from "@/hooks/useIdleDetector";
 
 interface LessonLayoutProps {
   title: string;
@@ -28,6 +30,9 @@ export function LessonLayout({
 }: LessonLayoutProps) {
   const { logs, currentStep, nextStep, resetLesson } = useLessonStore();
   const logsEndRef = useRef<HTMLDivElement>(null);
+  
+  // Activate Idle Detector
+  useIdleDetector();
 
   // Auto-scroll logs
   useEffect(() => {
@@ -111,6 +116,7 @@ export function LessonLayout({
       </div>
 
       <Terminal />
+      <CommsOverlay />
     </main>
   );
 }

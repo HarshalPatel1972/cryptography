@@ -7,6 +7,8 @@ import { Bit } from "./components/Bit";
 import { useLessonStore } from "@/stores/useLessonStore";
 import { Trail } from "@react-three/drei";
 import * as THREE from "three";
+import { GuideCue } from "@/components/canvas/GuideCue";
+import { useGuidanceStore } from "@/stores/useGuidanceStore";
 
 // A Falling Bit component wrapper for Physics
 function FallingBit({ id, startValue, position }: { id: string, startValue: 0 | 1, position: [number, number, number] }) {
@@ -52,6 +54,7 @@ function FilterBit({ index, position }: { index: number, position: [number, numb
 
 export function XORScene() {
   const logAction = useLessonStore(state => state.logAction);
+  const { currentStep } = useGuidanceStore();
   
   // Track falling bits: simplespawner logic
   // For MVP, we spawn a set number or use a interval
@@ -85,7 +88,12 @@ export function XORScene() {
          {Array.from({ length: 8 }).map((_, i) => (
            <FilterBit key={i} index={i} position={[i * 2 - 7, 0, 0]} />
          ))}
+         {/* Step 0: Point to Key */}
+         <GuideCue position={[0, 2, 0]} visible={currentStep === 0} />
       </group>
+
+      {/* Step 1: Point to Spawner */}
+      <GuideCue position={[0, 10, 0]} visible={currentStep === 1} />
 
       {/* The Neon Rain */}
       {fallingBits.map((bit) => (
