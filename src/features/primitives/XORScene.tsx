@@ -5,21 +5,31 @@ import { Physics, RigidBody, RapierRigidBody } from "@react-three/rapier";
 import { useRef, useState, useMemo } from "react";
 import { Bit } from "./components/Bit";
 import { useLessonStore } from "@/stores/useLessonStore";
-import { Trail } from "@react-three/drei";
+import { Trail, Text, Line, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { GuideCue } from "@/components/canvas/GuideCue";
 import { useGuidanceStore } from "@/stores/useGuidanceStore";
+import { TruthTableHUD } from "./components/TruthTableHUD";
 
 // A Falling Bit component wrapper for Physics
-function FallingBit({ id, startValue, position }: { id: string, startValue: 0 | 1, position: [number, number, number] }) {
+function FallingBit({ id, startValue, position, slowMo }: { id: string, startValue: 0 | 1, position: [number, number, number], slowMo: boolean }) {
   const rigidBody = useRef<RapierRigidBody>(null);
   // We track value changes after collision
   const [value, setValue] = useState(startValue);
   const [color, setColor] = useState<string | undefined>(undefined);
 
-  // Expose update function to parent (hacky but functional for simple physics scene, 
-  // or use user data in collision event to trigger state change)
-  
+  useFrame(() => {
+     if (rigidBody.current) {
+        // Simple manual slow-mo by damping velocity if enabled
+        // Ideally we control physics time step, but Rapier's timeScale isn't reactive per body
+        // We can just dampen velocity for effect
+        if (slowMo) {
+            const vel = rigidBody.current.linvel();
+            rigidBody.current.setLinvel({ x: vel.x, y: Math.max(vel.y, -1), z: vel.z }, true);
+        }
+     }
+  });
+
   return (
     <RigidBody 
       ref={rigidBody} 
@@ -36,50 +46,82 @@ function FallingBit({ id, startValue, position }: { id: string, startValue: 0 | 
   );
 }
 
-// The Filter Bit (Static)
+// The Filter Bit (Static) with Label
 function FilterBit({ index, position }: { index: number, position: [number, number, number] }) {
   const [value, setValue] = useState<0 | 1>(0);
   
   return (
-    <RigidBody position={position} type="fixed" colliders="cuboid" userData={{ type: "filter", value, index }}>
-      <Bit 
-        value={value} 
-        interactive 
-        onClick={() => setValue(v => v === 0 ? 1 : 0)} 
-        scale={1.2}
-      />
-    </RigidBody>
+    <group position={position}>
+        {/* Label for Key */}
+        {index === 0 && (
+            <Text position={[-2, 1.5, 0]} fontSize={0.5} color="#bc13fe" anchorX="right">
+                INPUT B (KEY)
+            </Text>
+        )}
+        
+        <RigidBody type="fixed" colliders="cuboid" userData={{ type: "filter", value, index }}>
+          <Bit 
+            value={value} 
+            interactive 
+            onClick={() => setValue(v => v === 0 ? 1 : 0)} 
+            scale={1.2}
+          />
+        </RigidBody>
+    </group>
   );
 }
 
 export function XORScene() {
   const logAction = useLessonStore(state => state.logAction);
   const { currentStep } = useGuidanceStore();
-  
-  // Track falling bits: simplespawner logic
-  // For MVP, we spawn a set number or use a interval
-  // Here let's just render a few initial ones and maybe a "Rain" system
-  // We'll use a fixed set of falling bits that recycle or just one wave for "Level 0"
+  const [slowMo, setSlowMo] = useState(false);
+  const [activeCollision, setActiveCollision] = useState<{ a: 0 | 1, b: 0 | 1, out: 0 | 1, pos: [number, number, number] } | null>(null);
+
+  // Clear collision highlight after a moment
+  useFrame(() => {
+     if (activeCollision && Math.random() > 0.95) {
+         setActiveCollision(null);
+     }
+  });
   
   const fallingBits = useMemo(() => {
     return Array.from({ length: 8 }).map((_, i) => ({
       id: `falling-${i}`,
       startValue: Math.random() > 0.5 ? 1 : 0 as 0 | 1,
-      position: [i * 2 - 7, 10 + i * 2, 0] as [number, number, number] // Staggered drop
+      position: [i * 2 - 7, 10 + i * 2, 0] as [number, number, number] 
     }));
   }, []);
 
-  const handleCollision = (payload: any) => {
-    // Check if collision is between Falling and Filter
-    // Rapier onCollisionEnter handler on the Physics component isn't standard, 
-    // usually we put it on rigid bodies. 
-    // But we need to coordinate.
-    // Let's rely on the falling bit's collision event if we can attached it there.
-  };
-
   return (
-    <Physics gravity={[0, -5, 0]}>
-      {/* Light setup for this specific scene */}
+    <>
+    {/* HUD Controls */}
+    <Html position={[-6, 5, 0]}>
+        <div className="flex flex-col gap-2">
+            <button 
+                className={`px-4 py-2 border rounded font-mono font-bold transition-all ${slowMo ? "bg-neon-cyan text-black border-neon-cyan" : "bg-black/50 text-neon-cyan border-neon-cyan"}`}
+                onClick={() => setSlowMo(!slowMo)}
+            >
+                {slowMo ? "⏸ SLOW-MO ACTIVE" : "▶ SLOW-MO"}
+            </button>
+            <div className="text-xs text-neon-green font-mono">
+                {slowMo ? "TIME SCALE: 0.1x" : "TIME SCALE: 1.0x"}
+            </div>
+        </div>
+    </Html>
+
+    <TruthTableHUD lastResult={activeCollision} />
+
+    {/* Connector Line */}
+    {activeCollision && (
+        <Line 
+            points={[activeCollision.pos, [activeCollision.pos[0], activeCollision.pos[1] - 2, 0]]} // Simple vertical line for now
+            color="white"
+            lineWidth={2}
+            dashed
+        />
+    )}
+
+    <Physics gravity={[0, slowMo ? -1 : -5, 0]}>
       <ambientLight intensity={0.5} />
       <pointLight position={[0, 10, 10]} intensity={1} color="#00f3ff" />
       
@@ -88,14 +130,17 @@ export function XORScene() {
          {Array.from({ length: 8 }).map((_, i) => (
            <FilterBit key={i} index={i} position={[i * 2 - 7, 0, 0]} />
          ))}
-         {/* Step 0: Point to Key */}
          <GuideCue position={[0, 2, 0]} visible={currentStep === 0} />
       </group>
 
-      {/* Step 1: Point to Spawner */}
       <GuideCue position={[0, 10, 0]} visible={currentStep === 1} />
 
-      {/* The Neon Rain */}
+      {/* Input Label for Rain */}
+      <Text position={[-8, 8, 0]} fontSize={0.5} color="#00f3ff" anchorX="right">
+        INPUT A (DATA)
+      </Text>
+
+      {/* Falling Bits */}
       {fallingBits.map((bit) => (
         <RigidBody 
             key={bit.id}
@@ -103,54 +148,60 @@ export function XORScene() {
             type="dynamic"
             onCollisionEnter={({ other }) => {
               if (other.rigidBodyObject?.userData.type === "filter") {
-                 const filterVal = other.rigidBodyObject.userData.value;
-                 // We can't easily access the React state of the child here without context/refs
-                 // But we can just use the store to log for now, or use a customized store for scene state
-                 logAction(`Collision! Filter Value: ${filterVal}`);
-                 // Actual XOR visual logic requires updating the FallingBit state
-                 // This is tricky in pure R3F+Rapier without a central scene manager system,
-                 // but for "Level 0" visualization we can cheat:
-                 // The "Falling Bit" component should handle its own collision logic if possible.
+                 const filterVal = other.rigidBodyObject.userData.value as 0 | 1;
+                 // We can't access React state of the child falling bit directly here cleanly without Refs
+                 // For now, we rely on the wrapper below to handle logic, 
+                 // this just handles global event logging if needed
               }
             }}
         >
-             {/* Instead of inline RigidBody, let's use the component that has state logic inside */}
-            <BitLogicWrapper startValue={bit.startValue} />
+             <BitLogicWrapper 
+                startValue={bit.startValue} 
+                setActiveCollision={setActiveCollision}
+             />
         </RigidBody>
       ))}
       
-      {/* Floor to catch them */}
       <RigidBody type="fixed" position={[0, -10, 0]}>
         <mesh visible={false}>
           <boxGeometry args={[100, 1, 10]} />
         </mesh>
       </RigidBody>
     </Physics>
+    </>
   );
 }
 
-// Helper to handle collision logic cleanly with state
-function BitLogicWrapper({ startValue }: { startValue: 0 | 1 }) {
+// Logic Wrapper
+function BitLogicWrapper({ startValue, setActiveCollision }: { startValue: 0 | 1, setActiveCollision: (val: any) => void }) {
   const [value, setValue] = useState(startValue);
   const [color, setColor] = useState<string | undefined>(undefined);
   const logAction = useLessonStore(state => state.logAction);
-  const processedRef = useRef(false); // Only XOR once
+  const processedRef = useRef(false);
 
   return (
     <RigidBody 
        type="dynamic" 
        colliders="cuboid"
-       onCollisionEnter={({ other }) => {
+       onCollisionEnter={({ other, manifold }) => {
          if (processedRef.current) return;
          if (other.rigidBodyObject?.userData.type === "filter") {
             const filterValue = other.rigidBodyObject.userData.value as 0 | 1;
             const result = (value ^ filterValue) as 0 | 1;
             
-            // Visual Interaction
             setValue(result);
-            setColor(result === 1 ? "#0aff0a" : "#ff0055"); // Green for 1, Red for 0 (Result)
+            setColor(result === 1 ? "#0aff0a" : "#ff0055");
             
             logAction(`XOR: ${value} ^ ${filterValue} = ${result}`);
+            
+            // Trigger HUD update
+            setActiveCollision({
+                a: value,
+                b: filterValue,
+                out: result,
+                pos: [0,0,0] // Ideally get contact point
+            });
+
             processedRef.current = true;
          }
        }}
