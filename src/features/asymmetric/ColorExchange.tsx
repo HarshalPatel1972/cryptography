@@ -2,8 +2,8 @@
 
 import { useRef, useState, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Color, ShaderMaterial, Vector3 } from "three";
-import { Text } from "@react-three/drei";
+import { Color, ShaderMaterial } from "three";
+import { Text, Html } from "@react-three/drei";
 import { easing } from "maath";
 
 // Simple Liquid Shader
@@ -41,7 +41,7 @@ const liquidFragmentShader = `
   }
 `;
 
-function Bucket({ position, color, mixColor = new Color("#ffffff"), mixFactor = 0, label, onClick }: any) {
+function Bucket({ position, color, mixColor = new Color("#ffffff"), mixFactor = 0, label, mathLabel, onClick }: any) {
   const meshRef = useRef<any>(null);
   const materialRef = useRef<ShaderMaterial>(null);
   
@@ -55,7 +55,6 @@ function Bucket({ position, color, mixColor = new Color("#ffffff"), mixFactor = 
   useFrame((state, delta) => {
     if (materialRef.current) {
         materialRef.current.uniforms.uTime.value += delta;
-        // Smooth color interaction
         easing.dampC(materialRef.current.uniforms.uColor.value, new Color(color), 0.1, delta);
         easing.dampC(materialRef.current.uniforms.uMixColor.value, new Color(mixColor), 0.1, delta);
         easing.damp(materialRef.current.uniforms.uMixFactor, "value", mixFactor, 0.1, delta);
@@ -74,39 +73,36 @@ function Bucket({ position, color, mixColor = new Color("#ffffff"), mixFactor = 
            transparent
         />
       </mesh>
-      <Text position={[0, -1.2, 0]} fontSize={0.3} color={color}>
+      <Text position={[0, -1.2, 0]} fontSize={0.3} color="white">
         {label}
       </Text>
+      
+      {/* MATH LABEL (Floating Top) */}
+      <Html position={[0, 1.5, 0]} center>
+         <div className="bg-black/50 backdrop-blur px-2 py-1 rounded border border-white/20 text-neon-cyan font-mono text-sm">
+             {mathLabel}
+         </div>
+      </Html>
     </group>
   );
 }
 
 export function ColorExchange() {
-  // Constants
   const PUBLIC_COLOR = "#ff0000"; // Red
   const ALICE_PRIVATE = "#ffff00"; // Yellow
   const BOB_PRIVATE = "#0000ff"; // Blue
   const ALICE_MIX = "#ffaa00"; // Orange
   const BOB_MIX = "#aa00ff"; // Purple
-  const SECRET = "#553300"; // Brownish (Reality of pigment mix is ugly, but let's fake a nicer secret color?)
-  // Actually RGB additive mixing: Yellow(1,1,0) + Red(1,0,0) = (1, 0.5, 0) Orange.
-  // Blue(0,0,1) + Red(1,0,0) = (0.5, 0, 0.5) Purple.
-  // Secret: Alice Mix (Orange) + Blue? Or Bob Mix (Purple) + Yellow?
-  // (1, 0.5, 0) + (0, 0, 1) -> (1, 0.5, 1)? Pinkish.
-  // Let's target a Shared Secret color: GREEN (for success) just to be visually distinct?
-  // User Prompt: "Both buckets turn the exact same shade of Purple".
-  // Okay, let's say the secret is Purple.
-  // Bob's mix (Purple) + Alice Secret (Yellow) -> Shared.
-  // We need to fudge the colors to look good.
-  
+
   const [step, setStep] = useState(0); 
-  // 0: Start (Private Colors)
-  // 1: Add Public (Mix)
-  // 2: Exchange (Swap Positions)
-  // 3: Add Private (Shared Secret)
 
   const [aliceColor, setAliceColor] = useState(ALICE_PRIVATE);
   const [bobColor, setBobColor] = useState(BOB_PRIVATE);
+  // Math Labels State
+  const [aliceMath, setAliceMath] = useState("a (Private)");
+  const [bobMath, setBobMath] = useState("b (Private)");
+  const [equation, setEquation] = useState("START: Key Generation");
+
   const [alicePos, setAlicePos] = useState<[number, number, number]>([-2, 0, 0]);
   const [bobPos, setBobPos] = useState<[number, number, number]>([2, 0, 0]);
 
@@ -115,16 +111,23 @@ export function ColorExchange() {
         // Mix Public
         setAliceColor(ALICE_MIX);
         setBobColor(BOB_MIX);
+        setAliceMath("A = g^a mod p");
+        setBobMath("B = g^b mod p");
+        setEquation("STEP 1: Mix Private Key with Public Standard (g)");
         setStep(1);
     } else if (step === 1) {
         // Exchange
         setAlicePos([2, 0, 0]);
         setBobPos([-2, 0, 0]);
+        setEquation("STEP 2: Exchange Public Keys across the network");
         setStep(2);
     } else if (step === 2) {
         // Final Secret
-        setAliceColor("#880088"); // Shared Purple
+        setAliceColor("#880088"); 
         setBobColor("#880088");
+        setAliceMath("S = B^a mod p");
+        setBobMath("S = A^b mod p");
+        setEquation("STEP 3: Calculate Shared Secret");
         setStep(3);
     } else {
         // Reset
@@ -132,18 +135,12 @@ export function ColorExchange() {
         setBobColor(BOB_PRIVATE);
         setAlicePos([-2, 0, 0]);
         setBobPos([2, 0, 0]);
+        setAliceMath("a (Private)");
+        setBobMath("b (Private)");
+        setEquation("START: Key Generation");
         setStep(0);
     }
   };
-
-  useFrame((state, delta) => {
-      // Animate positions
-      // easing.damp3(...) if needed, but react-spring handled by positions state change usually not animated unless using motion
-      // We will just snap for MVP or assume position props are animated by parent? 
-      // Nope, we need to animate them here if we want them to slide.
-      // But Bucket doesn't wrap position in spring.
-      // Let's leave them snapping for MVP or refactor to use spring.
-  });
 
   return (
     <group>
@@ -152,13 +149,21 @@ export function ColorExchange() {
          <sphereGeometry args={[0.5]} />
          <meshStandardMaterial color={PUBLIC_COLOR} emissive={PUBLIC_COLOR} emissiveIntensity={0.5} />
       </mesh>
-      <Text position={[0, 4.8, 0]} fontSize={0.3} color={PUBLIC_COLOR}>PUBLIC (RED)</Text>
+      <Text position={[0, 4.8, 0]} fontSize={0.3} color={PUBLIC_COLOR}>PUBLIC (g)</Text>
+
+      {/* EQUATION BANNER */}
+      <Html position={[0, 3, 0]} center>
+          <div className="bg-black/80 border border-neon-purple px-4 py-2 rounded-full text-white font-mono min-w-[300px] text-center shadow-[0_0_15px_rgba(188,19,254,0.3)]">
+             {equation}
+          </div>
+      </Html>
 
       {/* Alice Bucket */}
       <Bucket 
          position={alicePos} 
          color={aliceColor} 
-         label={step >= 2 ? "BOB'S MIX" : "ALICE"} // Label follows bucket logic?
+         label={step >= 2 ? "BOB'S MIX" : "ALICE"} 
+         mathLabel={aliceMath}
          onClick={handleNext}
       />
 
@@ -167,14 +172,22 @@ export function ColorExchange() {
          position={bobPos} 
          color={bobColor} 
          label={step >= 2 ? "ALICE'S MIX" : "BOB"}
+         mathLabel={bobMath}
          onClick={handleNext}
       />
       
-      <Text position={[0, -3, 0]} fontSize={0.4} color="white" onClick={handleNext}>
-        {step === 0 && "STEP 1: ADD PUBLIC COLOR (CLICK)"}
-        {step === 1 && "STEP 2: EXCHANGE BUCKETS (CLICK)"}
-        {step === 2 && "STEP 3: ADD PRIVATE SECRET (CLICK)"}
-        {step === 3 && "SHARED SECRET CREATED! (RESET)"}
+      {/* GIANT NUMBER REVEAL */}
+      {step === 3 && (
+          <Html position={[0, -2, 0]} center>
+              <div className="text-4xl font-bold text-neon-green animate-bounce drop-shadow-[0_0_10px_rgba(0,255,0,0.8)]">
+                  4,294,967,296
+              </div>
+              <div className="text-xs text-center text-white/50 mt-1">SHARED SECRET (INTEGER)</div>
+          </Html>
+      )}
+
+      <Text position={[0, -4, 0]} fontSize={0.4} color="white" onClick={handleNext}>
+        CLICK BUCKETS TO PROCEED
       </Text>
     </group>
   );
