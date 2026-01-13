@@ -3,13 +3,16 @@
 import { Canvas } from "@react-three/fiber";
 import { Suspense } from "react";
 import { OrbitControls, Preload } from "@react-three/drei";
-import { EffectComposer, Bloom } from "@react-three/postprocessing";
+import { EffectComposer, Bloom, Glitch } from "@react-three/postprocessing";
+import { GlitchMode } from "postprocessing";
 import { Starfield } from "./Starfield";
 import { TopicCluster } from "./TopicCluster";
 import { useRouter } from "next/navigation";
+import { useLessonStore } from "@/stores/useLessonStore";
 
 export default function Scene() {
   const router = useRouter();
+  const { isGlitching } = useLessonStore();
 
   return (
     <Canvas
@@ -22,6 +25,11 @@ export default function Scene() {
       {/* Post-processing effects */}
       <EffectComposer>
         <Bloom luminanceThreshold={0.2} mipmapBlur intensity={1.5} />
+        <Glitch 
+            active={isGlitching}
+            mode={GlitchMode.CONSTANT_MILD} 
+            ratio={0.85}
+        />
       </EffectComposer>
 
       {/* The Void */}

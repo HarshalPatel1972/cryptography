@@ -5,6 +5,7 @@ import { clsx } from "clsx";
 import { Monitor, RefreshCcw, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+import { Terminal } from "@/components/dom/Terminal";
 
 interface LessonLayoutProps {
   title: string;
@@ -108,6 +109,8 @@ export function LessonLayout({
           <ChevronRight size={16} />
         </button>
       </div>
+
+      <Terminal />
     </main>
   );
 }
