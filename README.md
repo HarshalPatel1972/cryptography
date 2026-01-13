@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Crypto-Verse: Interactive Cryptography Explorer 🛡️
 
-## Getting Started
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Next.js](https://img.shields.io/badge/Next.js-15.0-black)
+![Rust](https://img.shields.io/badge/Rust-1.75+-orange)
+![Wasm](https://img.shields.io/badge/Wasm-active-purple)
+![Three.js](https://img.shields.io/badge/Three.js-r3f-white)
 
-First, run the development server:
+> **"Master the art of encryption. A 3D interactive journey from XOR to Elliptic Curves."**
 
+Crypto-Verse is an educational platform that visualizes complex cryptographic concepts using **WebGL (Three.js)** and **Real Wasm Logic**. It simulates a "Hacker Terminal" experience where users learn by doing.
+
+---
+
+## 🚀 The Stack (Hybrid Architecture)
+
+This project uses a high-performance **Hybrid Architecture**:
+- **Frontend**: Next.js 15 + React Three Fiber (Canvas).
+- **Core Logic**: Rust (compiled to WebAssembly via `wasm-pack`).
+- **Styling**: TailwindCSS (Cyberpunk Theme).
+- **Game Engine**: Zustand + use-sound + Rapier Physics.
+
+| Layer | Tech | Purpose |
+|-------|------|---------|
+| **UI** | Next.js / Tailwind | Layout, Terminal, Navigation |
+| **Visuals** | Three.js / R3F | 3D Scenes, Particles, Shaders |
+| **Physics** | Rapier | Collision Detection (XOR Rain, Hash Mirror) |
+| **Compute** | **Rust Wasm** | AES Rounds, SHA-256 Hashing, BigInt Math |
+
+---
+
+## 📚 The Curriculum
+
+1.  **Primitives**: The Bit & The XOR Gate (Neon Rain).
+2.  **Symmetric**: AES-128 Encryption (The Cube).
+3.  **Asymmetric**: Diffie-Hellman Key Exchange (Color Mixing).
+4.  **Hashing**: SHA-256 Avalanche Effect (Shattering Mirror).
+5.  **Signatures**: Digital Signatures (Holographic Seal).
+6.  **ECC**: Elliptic Curve Cryptography (Cosmic Billiards).
+
+---
+
+## 🛠️ Quick Start
+
+### Prerequisites
+- Node.js 18+ (or Bun)
+- Rust & Cargo (`rustup`)
+- `wasm-pack` (`cargo install wasm-pack`)
+
+### 1. Clone & Install
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/your-username/crypto-verse.git
+cd crypto-verse
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Build the Rust Core
+*Note: The Wasm binary is pre-committed in `src/lib/wasm` for convenience, but you can rebuild it:*
+```bash
+cd crates/crypto-engine
+wasm-pack build --target web --out-dir ../../src/lib/wasm/crypto-engine
+cd ../..
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Run the Development Server
+```bash
+npm run dev
+```
+Visit `http://localhost:3000`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🎮 Gamification (CTF Mode)
+The app features a hidden **Capture The Flag** layer.
+- Open the terminal at the bottom of a lesson.
+- Type `help` to see commands.
+- Solve challenges (like brute-forcing an XOR cipher) to unlock achievements.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📦 Deployment
+The project is optimized for **Vercel**.
+- `vercel.json` handles `.wasm` MIME types.
+- `next.config.ts` handles Wasm async loading.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```json
+/* vercel.json */
+{
+  "headers": [
+    { "source": "/(.*).wasm", "headers": [{ "key": "Content-Type", "value": "application/wasm" }] }
+  ]
+}
+```
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🤝 Contributing
+1.  Fork the repo.
+2.  Create a branch: `git checkout -b feat/new-lesson`.
+3.  Commit changes (follow Conventional Commits): `git commit -m "feat: add RSA visualization"`.
+4.  Push & PR.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+Built with 💻 and 🦀 by **The Architect**.
