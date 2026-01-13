@@ -4,18 +4,22 @@ import { Canvas } from '@react-three/fiber';
 
 export default function Home() {
   const [wasmReady, setWasmReady] = useState(false);
+  const [greeting, setGreeting] = useState('');
 
   useEffect(() => {
     // Dynamic import to load Wasm asynchronously
     const loadWasm = async () => {
-      // TODO: Uncomment when wasm-pack build is complete
-      // const wasm = await import('@/lib/wasm/crypto-engine');
-      // await wasm.default();
-      // console.log(wasm.greet('Crypto-Verse'));
-      
-      // Simulate Wasm loading for now
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setWasmReady(true);
+      try {
+        const wasm = await import('@/lib/wasm/crypto-engine/crypto_engine');
+        await wasm.default();
+        const greetMsg = wasm.greet('Crypto-Verse');
+        setGreeting(greetMsg);
+        setWasmReady(true);
+        console.log('[WASM] ', greetMsg);
+      } catch (error) {
+        console.error('[WASM] Failed to load:', error);
+        setWasmReady(false);
+      }
     };
     loadWasm();
   }, []);
@@ -33,6 +37,10 @@ export default function Home() {
           Rust Core: {wasmReady ? <span className="text-neon-green">ACTIVE</span> : <span className="animate-pulse">LOADING...</span>}
         </span>
       </div>
+      
+      {greeting && (
+        <p className="mt-4 text-sm text-neon-green/70 font-mono">{greeting}</p>
+      )}
       
       {/* 3D Scene Layer */}
       <div className="absolute inset-0 -z-10 opacity-30">
