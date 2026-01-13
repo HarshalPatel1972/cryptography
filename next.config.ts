@@ -5,10 +5,12 @@ const nextConfig: NextConfig = {
   transpilePackages: ['three', 'gsap', '@react-three/drei', '@react-three/postprocessing'],
   // Strict mode helps catch 3D cleanup bugs
   reactStrictMode: true,
-  // We don't need image optimization for 3D textures usually, but good to keep default
+  // We don't need image optimization for 3D textures usually
   images: {
-    unoptimized: true, // often better for local textures in WebGL
+    unoptimized: true,
   },
+  // Empty turbopack config to avoid warning
+  turbopack: {},
 };
 
 export default nextConfig;

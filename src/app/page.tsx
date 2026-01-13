@@ -1,9 +1,49 @@
+'use client';
+import { useEffect, useState } from 'react';
+import { Canvas } from '@react-three/fiber';
+
 export default function Home() {
+  const [wasmReady, setWasmReady] = useState(false);
+
+  useEffect(() => {
+    // Dynamic import to load Wasm asynchronously
+    const loadWasm = async () => {
+      // TODO: Uncomment when wasm-pack build is complete
+      // const wasm = await import('@/lib/wasm/crypto-engine');
+      // await wasm.default();
+      // console.log(wasm.greet('Crypto-Verse'));
+      
+      // Simulate Wasm loading for now
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setWasmReady(true);
+    };
+    loadWasm();
+  }, []);
+
   return (
-    <main className="h-screen w-full bg-void flex items-center justify-center">
-      <h1 className="text-4xl font-bold text-neon-cyan animate-pulse">
-        SYSTEM INITIALIZED
+    <main className="h-screen w-full bg-void text-neon-cyan flex flex-col items-center justify-center">
+      <h1 className="text-4xl font-bold tracking-widest uppercase">
+        System Initialized
       </h1>
+      <div className="mt-4 flex gap-4">
+        <span className="px-4 py-1 border border-neon-cyan/50 rounded">
+          3D Engine: <span className="text-neon-green">ONLINE</span>
+        </span>
+        <span className="px-4 py-1 border border-neon-purple/50 rounded">
+          Rust Core: {wasmReady ? <span className="text-neon-green">ACTIVE</span> : <span className="animate-pulse">LOADING...</span>}
+        </span>
+      </div>
+      
+      {/* 3D Scene Layer */}
+      <div className="absolute inset-0 -z-10 opacity-30">
+        <Canvas>
+          <mesh rotation={[0.5, 0.5, 0]}>
+            <boxGeometry />
+            <meshStandardMaterial color="#00f3ff" wireframe />
+          </mesh>
+          <ambientLight intensity={2} />
+        </Canvas>
+      </div>
     </main>
   );
 }
