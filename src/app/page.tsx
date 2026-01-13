@@ -10,12 +10,11 @@ const Scene = dynamic(() => import('@/components/canvas/Scene'), {
   ssr: false,
   loading: () => <Loader />
 });
-import { useScramble } from "@/hooks/useScramble";
-import { SyllabusOverlay } from "@/components/dom/SyllabusOverlay";
+import { CurriculumGrid } from "@/components/dom/CurriculumGrid";
 
 export default function Home() {
   const [wasmReady, setWasmReady] = useState(false);
-  const { displayText } = useScramble("CRYPTOGRAPHY");
+  // const { displayText } = useScramble("CRYPTOGRAPHY"); // Removed in Phase 6.9
 
   // Keep Wasm loading logic for "God Prompt" completeness, 
   // but now we focus on the visual scene.
@@ -41,30 +40,9 @@ export default function Home() {
         <Scene />
       </div>
 
-      {/* UI Overlay (z-10) */}
-      <div className="absolute inset-0 z-10 pointer-events-none flex flex-col items-center justify-center">
-        <h1 className="text-6xl font-bold tracking-[0.5em] text-neon-cyan animate-pulse font-mono">
-          {displayText}
-        </h1>
-        
-        {/* Status Indicators (Small, bottom right) */}
-        <div className="absolute bottom-8 right-8 flex flex-col gap-2 items-end">
-          <div className="flex gap-2 text-xs font-mono">
-             <span className="text-neon-purple/70">VISUAL ENGINE:</span>
-             <span className="text-neon-cyan">ONLINE</span>
-          </div>
-          <div className="flex gap-2 text-xs font-mono">
-             <span className="text-neon-purple/70">WASM CORE:</span>
-             <span className={wasmReady ? "text-neon-green" : "text-yellow-500"}>
-               {wasmReady ? "ACTIVE" : "CONNECTING..."}
-             </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Syllabus Overlay Button & Panel (z-50) */}
-      <div className="absolute inset-0 z-50 pointer-events-auto">
-         <SyllabusOverlay />
+      {/* Main Command Center Overlay (z-10) */}
+      <div className="absolute inset-0 z-10">
+        <CurriculumGrid />
       </div>
     </main>
   );
