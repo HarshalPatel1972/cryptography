@@ -13,8 +13,30 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Crypto-Verse | Interactive Cryptography",
-  description: "A 3D interactive journey through the world of cryptography",
+  title: "Crypto-Verse | Interactive Cryptography Explorer",
+  description: "Master the art of encryption. A 3D interactive journey from XOR to Elliptic Curves.",
+  openGraph: {
+    title: "Crypto-Verse | Interactive Cryptography Explorer",
+    description: "Master the art of encryption. A 3D interactive journey from XOR to Elliptic Curves.",
+    url: "https://crypto-verse.vercel.app",
+    siteName: "Crypto-Verse",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Crypto-Verse Preview",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Crypto-Verse",
+    description: "Master the art of encryption in 3D.",
+    creator: "@TheCryptoVerse",
+  },
 };
 
 export default function RootLayout({

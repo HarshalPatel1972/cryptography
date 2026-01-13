@@ -3,8 +3,13 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 
+import { Loader } from "@/components/layout/Loader";
+
 // Dynamically import Scene to avoid SSR issues with R3F
-const Scene = dynamic(() => import('@/components/canvas/Scene'), { ssr: false });
+const Scene = dynamic(() => import('@/components/canvas/Scene'), { 
+  ssr: false,
+  loading: () => <Loader />
+});
 import { useScramble } from "@/hooks/useScramble";
 
 export default function Home() {

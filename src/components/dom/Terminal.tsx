@@ -79,6 +79,7 @@ export function Terminal() {
                         onKeyDown={handleKeyDown}
                         className="bg-transparent border-none outline-none text-white w-full caret-neon-cyan"
                         autoFocus
+                        aria-label="Terminal Command Line Interface"
                     />
                 </div>
                 <div ref={bottomRef} />
