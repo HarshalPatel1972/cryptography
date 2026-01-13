@@ -1,56 +1,59 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { Canvas } from '@react-three/fiber';
+
+import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+
+// Dynamically import Scene to avoid SSR issues with R3F
+const Scene = dynamic(() => import('@/components/canvas/Scene'), { ssr: false });
+import { useScramble } from "@/hooks/useScramble";
 
 export default function Home() {
   const [wasmReady, setWasmReady] = useState(false);
-  const [greeting, setGreeting] = useState('');
+  const { displayText } = useScramble("CRYPTOGRAPHY");
 
+  // Keep Wasm loading logic for "God Prompt" completeness, 
+  // but now we focus on the visual scene.
   useEffect(() => {
-    // Dynamic import to load Wasm asynchronously
     const loadWasm = async () => {
       try {
         const wasm = await import('@/lib/wasm/crypto-engine/crypto_engine');
         await wasm.default();
-        const greetMsg = wasm.greet('Crypto-Verse');
-        setGreeting(greetMsg);
+        // Simply log the greeting for now since we removed the state
+        console.log("Wasm Greeting:", wasm.greet('Crypto-Verse'));
         setWasmReady(true);
-        console.log('[WASM] ', greetMsg);
-      } catch (error) {
-        console.error('[WASM] Failed to load:', error);
-        setWasmReady(false);
+      } catch (e) {
+        console.error("Wasm failed", e);
       }
     };
     loadWasm();
   }, []);
 
   return (
-    <main className="h-screen w-full bg-void text-neon-cyan flex flex-col items-center justify-center">
-      <h1 className="text-4xl font-bold tracking-widest uppercase">
-        System Initialized
-      </h1>
-      <div className="mt-4 flex gap-4">
-        <span className="px-4 py-1 border border-neon-cyan/50 rounded">
-          3D Engine: <span className="text-neon-green">ONLINE</span>
-        </span>
-        <span className="px-4 py-1 border border-neon-purple/50 rounded">
-          Rust Core: {wasmReady ? <span className="text-neon-green">ACTIVE</span> : <span className="animate-pulse">LOADING...</span>}
-        </span>
+    <main className="relative h-screen w-full bg-void overflow-hidden">
+      {/* 3D Scene Background (z-0) */}
+      <div className="absolute inset-0 z-0">
+        <Scene />
       </div>
-      
-      {greeting && (
-        <p className="mt-4 text-sm text-neon-green/70 font-mono">{greeting}</p>
-      )}
-      
-      {/* 3D Scene Layer */}
-      <div className="absolute inset-0 -z-10 opacity-30">
-        <Canvas>
-          <mesh rotation={[0.5, 0.5, 0]}>
-            <boxGeometry />
-            <meshStandardMaterial color="#00f3ff" wireframe />
-          </mesh>
-          <ambientLight intensity={2} />
-        </Canvas>
+
+      {/* UI Overlay (z-10) */}
+      <div className="absolute inset-0 z-10 pointer-events-none flex flex-col items-center justify-center">
+        <h1 className="text-6xl font-bold tracking-[0.5em] text-neon-cyan animate-pulse font-mono">
+          {displayText}
+        </h1>
+        
+        {/* Status Indicators (Small, bottom right) */}
+        <div className="absolute bottom-8 right-8 flex flex-col gap-2 items-end">
+          <div className="flex gap-2 text-xs font-mono">
+             <span className="text-neon-purple/70">VISUAL ENGINE:</span>
+             <span className="text-neon-cyan">ONLINE</span>
+          </div>
+          <div className="flex gap-2 text-xs font-mono">
+             <span className="text-neon-purple/70">WASM CORE:</span>
+             <span className={wasmReady ? "text-neon-green" : "text-yellow-500"}>
+               {wasmReady ? "ACTIVE" : "CONNECTING..."}
+             </span>
+          </div>
+        </div>
       </div>
     </main>
   );
