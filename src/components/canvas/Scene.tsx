@@ -6,8 +6,11 @@ import { OrbitControls, Preload } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import { Starfield } from "./Starfield";
 import { TopicCluster } from "./TopicCluster";
+import { useRouter } from "next/navigation";
 
 export default function Scene() {
+  const router = useRouter();
+
   return (
     <Canvas
       gl={{ antialias: false }}
@@ -31,6 +34,7 @@ export default function Scene() {
           geometryType="cone" 
           color="#00f3ff" // Cyan
           label="PRIMITIVES"
+          onClick={() => router.push('/lessons/primitives/xor')}
         />
         <TopicCluster 
           position={[0, 0, 0]} 
